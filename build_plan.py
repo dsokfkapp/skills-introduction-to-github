@@ -233,7 +233,7 @@ FIXES = [
  ("“安装上线打印/打码设备”", "合同仅含“标签打印、条码规则管理”，打码硬件未在供货清单：改为“配合调试”，设备由甲方提供"),
  ("无培训任务", "按交付物要求补充“分角色培训＋《用户操作手册》”，2天"),
  ("无预验收/终验收/质保节点", "补充预验收（杭州）、终验收、质保与7×24运维，共3条"),
- ("无文档交付对应", "新增“输出物”列，逐项挂接《项目实施方案》《需求报告》《蓝图设计》《详细设计方案》《实施报告》《培训计划》《用户操作手册》《系统上线报告》《安装配置维护手册》《预验收/终验收报告》《运行/运维报告》"),
+ ("无文档交付对应", "文档按合同交付物清单单独提交（《项目实施方案》《系统需求报告》《蓝图设计》《详细设计方案》《实施报告》《培训计划》《用户操作手册》《系统上线报告》《安装配置维护手册》《预验收/终验收报告》《运行/运维报告》），计划页不再单列"),
  ("“周期（Day）”整列空白", "全部补齐：现场实施38天（含并行），远程调试20天，试运行90天"),
  ("“负责人”整列空白", "按角色补齐：递缇项目经理/实施工程师、以弗德安装组、甲方设备商"),
  ("状态描述仅“待对接”", "统一状态字典并加下拉：未开始/进行中/已完成/受阻/待客户确认/待确认"),
@@ -305,25 +305,25 @@ ws0.column_dimensions["B"].width = 52
 ws0.column_dimensions["C"].width = 78
 
 # ---------- 计划 sheet ----------
-HEAD = ["阶段", "序号", "工作内容", "输出物 / 验收标准", "周期\n(Day)", "计划开始", "计划完成", "负责人", "责任方", "状态描述", "前置条件 / 依赖", "备注（差异与风险）"]
-WIDTH = [16, 6, 44, 30, 8, 11, 11, 15, 17, 12, 34, 36]
+HEAD = ["阶段", "序号", "工作内容", "周期\n(Day)", "计划开始", "计划完成", "负责人", "责任方", "状态描述", "前置条件 / 依赖", "备注（差异与风险）"]
+WIDTH = [16, 6, 60, 8, 11, 11, 15, 17, 12, 34, 36]
 
-ws.merge_cells("A1:L1")
+ws.merge_cells("A1:K1")
 ws["A1"] = "墨西哥CVT总成装配线MES系统 — 现场实施计划表"
 ws["A1"].font = Font(name=FONT, size=15, bold=True, color="FFFFFFFF")
 ws["A1"].fill = PatternFill("solid", fgColor=C_TITLE)
 ws["A1"].alignment = Alignment(horizontal="left", vertical="center", indent=1)
 ws.row_dimensions[1].height = 40
 
-ws.merge_cells("A2:L2")
+ws.merge_cells("A2:K2")
 ws["A2"] = "项目：CVT总成装配线MES系统（墨西哥）   合同编号：CDT-ZB251022-EPHOD-CVT-MES-01   甲方：重庆以弗德智能装备有限公司   乙方：上海递缇智能系统有限公司"
 ws["A2"].font = Font(name=FONT, size=9)
 ws["A2"].fill = PatternFill("solid", fgColor=C_INFO)
 ws["A2"].alignment = Alignment(horizontal="left", vertical="center")
 ws.row_dimensions[2].height = 26
 
-ws.merge_cells("A3:L3")
-ws["A3"] = "版本 V2.0（现场实施版）   编制：上海递缇项目管理   计划开始日：见“说明与修订”页（B5，可一键联动）   现场实施：38天   远程调试：1人×1个月   试运行：3个月或1000台"
+ws.merge_cells("A3:K3")
+ws["A3"] = "版本 V2.1（现场实施版）   编制：上海递缇项目管理   计划开始日：见“说明与修订”页（B5，可一键联动）   现场实施：38天   远程调试：1人×1个月   试运行：3个月或1000台"
 ws["A3"].font = Font(name=FONT, size=9, bold=True)
 ws["A3"].fill = PatternFill("solid", fgColor=C_INFO)
 ws["A3"].alignment = Alignment(horizontal="left", vertical="center")
@@ -348,25 +348,24 @@ for phase, items in TASKS:
         ROW[no] = r
         ws.cell(r, 2, no).alignment = Alignment(horizontal="center", vertical="center")
         ws.cell(r, 3, work)
-        ws.cell(r, 4, out)
-        ws.cell(r, 5, days).alignment = Alignment(horizontal="center", vertical="center")
-        ws.cell(r, 6, f"='说明与修订'!$B$5+{off}").number_format = "yyyy-mm-dd"
-        ws.cell(r, 7, f"=F{r}+E{r}-1").number_format = "yyyy-mm-dd"
-        ws.cell(r, 8, owner)
-        ws.cell(r, 9, party)
-        ws.cell(r, 10, status).alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
-        ws.cell(r, 11, pre)
-        ws.cell(r, 12, note)
-        for c in range(2, 13):
+        ws.cell(r, 4, days).alignment = Alignment(horizontal="center", vertical="center")
+        ws.cell(r, 5, f"='说明与修订'!$B$5+{off}").number_format = "yyyy-mm-dd"
+        ws.cell(r, 6, f"=E{r}+D{r}-1").number_format = "yyyy-mm-dd"
+        ws.cell(r, 7, owner)
+        ws.cell(r, 8, party)
+        ws.cell(r, 9, status).alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+        ws.cell(r, 10, pre)
+        ws.cell(r, 11, note)
+        for c in range(2, 12):
             cell = ws.cell(r, c)
             cell.border = BORDER
             cell.font = Font(name=FONT, size=9, bold=(no in (4, 7, 31, 39, 42, 43)))
             cell.alignment = Alignment(vertical="center", wrap_text=True,
-                                       horizontal=("center" if c in (2, 5, 9, 10) else "left"))
+                                       horizontal=("center" if c in (2, 4, 8, 9) else "left"))
         ws.row_dimensions[r].height = max(
-            34,
-            min(96, max(math.ceil(len(str(work)) / 21), math.ceil(len(str(out)) / 14),
-                        math.ceil(len(str(pre)) / 16), math.ceil(len(str(note)) / 17)) * 15 + 8)
+            30,
+            min(84, max(math.ceil(len(str(work)) / 28), math.ceil(len(str(pre)) / 16),
+                        math.ceil(len(str(note)) / 17)) * 15 + 8)
         )
         r += 1
     pe = r - 1
@@ -385,7 +384,7 @@ last = r - 1
 # 斑马纹
 for rr in range(5, last + 1):
     if (rr - 5) % 2 == 1:
-        for c in range(2, 13):
+        for c in range(2, 12):
             if ws.cell(rr, c).fill.fgColor.rgb in (None, "00000000"):
                 ws.cell(rr, c).fill = PatternFill("solid", fgColor=C_ZEBRA)
 
@@ -398,21 +397,21 @@ STATUS_FILL = {
     "进行中": "FFE8F0FE",
 }
 for rr in range(5, last + 1):
-    v = ws.cell(rr, 10).value
+    v = ws.cell(rr, 9).value
     if v in STATUS_FILL:
-        ws.cell(rr, 10).fill = PatternFill("solid", fgColor=STATUS_FILL[v])
+        ws.cell(rr, 9).fill = PatternFill("solid", fgColor=STATUS_FILL[v])
 
 dv = DataValidation(type="list", formula1='"未开始,进行中,已完成,受阻,待客户确认,待确认"', allow_blank=True)
 ws.add_data_validation(dv)
-dv.add(f"J5:J{last}")
+dv.add(f"I5:I{last}")
 
 # 隐藏偏移列
 for rr in range(5, last + 1):
-    ws.cell(rr, 13).value = next(t[4] for ph, items in TASKS for t in items if t[0] == ws.cell(rr, 2).value)
-ws.column_dimensions["M"].hidden = True
+    ws.cell(rr, 12).value = next(t[4] for ph, items in TASKS for t in items if t[0] == ws.cell(rr, 2).value)
+ws.column_dimensions["L"].hidden = True
 # 日期公式改为引用隐藏偏移列
 for rr in range(5, last + 1):
-    ws.cell(rr, 6).value = f"='说明与修订'!$B$5+M{rr}"
+    ws.cell(rr, 5).value = f"='说明与修订'!$B$5+L{rr}"
 
 # 合计行
 tr = last + 1
@@ -420,19 +419,19 @@ ws.merge_cells(start_row=tr, start_column=1, end_row=tr, end_column=4)
 ws.cell(tr, 1, "合计：现场实施 38 天（含并行作业）；远程调试 20 天；试运行 90 天；质保 365 天")
 ws.cell(tr, 1).font = Font(name=FONT, size=10, bold=True)
 ws.cell(tr, 1).alignment = Alignment(horizontal="left", vertical="center")
-for c in range(1, 13):
+for c in range(1, 12):
     ws.cell(tr, c).border = Border(left=thin, right=thin, bottom=thin, top=Side(style="medium", color="FFAAB4C5"))
     ws.cell(tr, c).fill = PatternFill("solid", fgColor="FFEAF2FF")
 ws.row_dimensions[tr].height = 26
 
 ws.freeze_panes = "C5"
-ws.auto_filter.ref = f"A4:L{last}"
+ws.auto_filter.ref = f"A4:K{last}"
 
 # 里程碑（依赖计划页实际行号）
 for i, (name, tno, crit) in enumerate(MILESTONES):
     rr = MS_START + i
     ws0.cell(rr, 1, name)
-    c = ws0.cell(rr, 2, f"=计划!G{ROW[tno]}")
+    c = ws0.cell(rr, 2, f"=计划!F{ROW[tno]}")
     c.number_format = "yyyy-mm-dd"
     ws0.cell(rr, 3, crit)
     for cc in range(1, 4):
@@ -440,7 +439,7 @@ for i, (name, tno, crit) in enumerate(MILESTONES):
         x.border = BORDER
         x.font = Font(name=FONT, size=10)
         x.alignment = Alignment(vertical="center", wrap_text=True)
-ws0["B6"] = f"=MAX(计划!G5:G{ROW[44]})-MIN(计划!F5:F{ROW[44]})+1"
+ws0["B6"] = f"=MAX(计划!F5:F{ROW[44]})-MIN(计划!E5:E{ROW[44]})+1"
 
 # ---------- 甘特 ----------
 wg = wb.create_sheet("甘特（周）")
