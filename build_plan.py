@@ -1,4 +1,5 @@
 import datetime
+import math
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
@@ -129,6 +130,22 @@ TASKS = [
  ]),
 ]
 
+# 国内已完成一轮调试：原第4条（Windows Server）与第5条（SQL Server）合并为“系统与数据库复核”
+MERGED4 = ("服务器系统与数据库复核（国内已安装）：核对主机名、固定IP、防火墙、远程桌面、实例、账号、端口、备份策略；异常时按镜像或配置基线恢复",
+           "系统与数据库复核记录", 1, 5, "递缇实施工程师", "递缇", "未开始",
+           "服务器硬件自检正常；国内已完成系统与数据库安装，具备镜像或配置基线",
+           "★国内已调过一轮，原“装Windows Server”“装SQL Server”两条合并为复核；若硬件变更再重新安装")
+_new, _n = [], 0
+for _ph, _items in TASKS:
+    _lst = []
+    for _t in _items:
+        if _t[0] == 5:
+            continue
+        _n += 1
+        _lst.append((_n,) + MERGED4 if _t[0] == 4 else (_n,) + _t[1:])
+    _new.append((_ph, _lst))
+TASKS = _new
+
 PHASE_COLOR = {
  "启动与前置条件确认": "FFD9E2F3",
  "现场硬件与网络环境搭建": "FFD7EDD9",
@@ -188,27 +205,17 @@ for i, v in enumerate(mh):
     c.fill = PatternFill("solid", fgColor=C_HEAD)
     c.font = Font(name=FONT, size=10, bold=True)
     c.alignment = Alignment(horizontal="center", vertical="center")
-MS = [
- ("到货清点完成", "=计划!G5", "开箱验货单签认"),
- ("机房上电完成", "=计划!G7", "服务器自检通过"),
- ("15工位客户端就绪", "=计划!G17", "15台可登录"),
- ("MES配置完成", "=计划!G29", "基础数据与工艺确认"),
- ("单机与采集调试完成", "=计划!G40", "采集数据入库"),
- ("试生产完成", "=计划!G44", "问题清单闭环"),
- ("现场交接", "=计划!G49", "完成确认书签署"),
- ("终验收", "=计划!G52", "按技术协议逐项"),
+MS_START = 12
+MILESTONES = [
+ ("到货清点完成", 1, "开箱验货单签认"),
+ ("机房上电完成", 3, "服务器自检通过"),
+ ("15工位客户端就绪", 12, "15台可登录"),
+ ("MES配置完成", 24, "基础数据与工艺确认"),
+ ("单机与采集调试完成", 35, "采集数据入库"),
+ ("试生产完成", 39, "问题清单闭环"),
+ ("现场交接", 44, "完成确认书签署"),
+ ("终验收", 47, "按技术协议逐项"),
 ]
-for i, (n, f, s) in enumerate(MS):
-    r = 12 + i
-    ws0.cell(r, 1, n)
-    c = ws0.cell(r, 2, f)
-    c.number_format = "yyyy-mm-dd"
-    ws0.cell(r, 3, s)
-    for cc in range(1, 4):
-        x = ws0.cell(r, cc)
-        x.border = BORDER
-        x.font = Font(name=FONT, size=10)
-        x.alignment = Alignment(vertical="center", wrap_text=True)
 
 ws0["A21"] = "三、对原表格已填内容的修订（逐条）"
 ws0["A21"].font = Font(name=FONT, size=11, bold=True)
@@ -236,6 +243,7 @@ FIXES = [
  ("无15工位逐站签认", "新增“工位签认表”页，15站逐项签认并标注扫码枪状态"),
  ("标题日期2026-10-15", "已过期旧日期：改为“计划开始日”参数（默认2026-11-02），全表公式联动"),
  ("性能指标未给判定方法", "在输出物列明确≤1秒/≤4秒、并发、故障恢复、数据不丢失的测试记录要求"),
+ ("“安装Windows Server 2016”“安装SQL Server”拆为两条独立任务", "国内已完成一轮调试：合并为“服务器系统与数据库复核”1天，保留镜像/配置基线恢复兜底；仅硬件变更时才重新安装"),
 ]
 for i, (a, b) in enumerate(FIXES):
     r = 23 + i
@@ -333,9 +341,11 @@ for i, w in enumerate(WIDTH, 1):
 
 r = 5
 phase_ranges = []
+ROW = {}
 for phase, items in TASKS:
     ps = r
     for (no, work, out, days, off, owner, party, status, pre, note) in items:
+        ROW[no] = r
         ws.cell(r, 2, no).alignment = Alignment(horizontal="center", vertical="center")
         ws.cell(r, 3, work)
         ws.cell(r, 4, out)
@@ -350,10 +360,14 @@ for phase, items in TASKS:
         for c in range(2, 13):
             cell = ws.cell(r, c)
             cell.border = BORDER
-            cell.font = Font(name=FONT, size=9, bold=(no in (8, 32, 40, 43, 44)))
+            cell.font = Font(name=FONT, size=9, bold=(no in (4, 7, 31, 39, 42, 43)))
             cell.alignment = Alignment(vertical="center", wrap_text=True,
                                        horizontal=("center" if c in (2, 5, 9, 10) else "left"))
-        ws.row_dimensions[r].height = 34
+        ws.row_dimensions[r].height = max(
+            34,
+            min(96, max(math.ceil(len(str(work)) / 21), math.ceil(len(str(out)) / 14),
+                        math.ceil(len(str(pre)) / 16), math.ceil(len(str(note)) / 17)) * 15 + 8)
+        )
         r += 1
     pe = r - 1
     phase_ranges.append((ps, pe, phase))
@@ -414,6 +428,20 @@ ws.row_dimensions[tr].height = 26
 ws.freeze_panes = "C5"
 ws.auto_filter.ref = f"A4:L{last}"
 
+# 里程碑（依赖计划页实际行号）
+for i, (name, tno, crit) in enumerate(MILESTONES):
+    rr = MS_START + i
+    ws0.cell(rr, 1, name)
+    c = ws0.cell(rr, 2, f"=计划!G{ROW[tno]}")
+    c.number_format = "yyyy-mm-dd"
+    ws0.cell(rr, 3, crit)
+    for cc in range(1, 4):
+        x = ws0.cell(rr, cc)
+        x.border = BORDER
+        x.font = Font(name=FONT, size=10)
+        x.alignment = Alignment(vertical="center", wrap_text=True)
+ws0["B6"] = f"=MAX(计划!G5:G{ROW[44]})-MIN(计划!F5:F{ROW[44]})+1"
+
 # ---------- 甘特 ----------
 wg = wb.create_sheet("甘特（周）")
 wg.sheet_view.showGridLines = False
@@ -448,7 +476,7 @@ for k in range(WEEKS):
 gr = 3
 for phase, items in TASKS:
     for (no, work, out, days, off, owner, party, status, pre, note) in items:
-        if no == 49:
+        if no == 48:
             continue
         wg.cell(gr, 1, no).alignment = Alignment(horizontal="center", vertical="center")
         wg.cell(gr, 2, phase)
